@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sqlalchemy
+geoalchemy2
+psycopg2-binary
+rasterio
+geopandas
+shapely
+pyproj
+python-multipart
+pytest
