@@ -20,7 +20,7 @@ def test_single_image_configuration_detection():
         "acquisition_date": "2024-05-01T00:00:00"
     }]
     res = validation.detect_configuration(images)
-    assert res["config"] == "SINGLE_IMAGE"
+    assert "Single Image" in res["config"]
     assert res["status"] == "READY_FOR_VQA"
 
 def test_bi_temporal_configuration_detection():
@@ -37,7 +37,7 @@ def test_bi_temporal_configuration_detection():
         }
     ]
     res = validation.detect_configuration(images)
-    assert res["config"] == "BI_TEMPORAL_PAIR"
+    assert "Bi-Temporal Pair" in res["config"]
     assert res["status"] == "READY_FOR_CHANGE_ANALYSIS"
 
 def test_cross_modal_configuration_detection():

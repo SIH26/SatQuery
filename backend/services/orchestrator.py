@@ -98,17 +98,22 @@ class LLMOrchestrator:
 
     def _analyze_intent_and_select_tools(self, query: str, config: str) -> Tuple[str, List[str], Optional[str]]:
         q_lower = query.lower()
+        cfg_upper = config.upper()
 
         # Input configuration validation rules
-        if config == "INVALID":
+        if "INVALID" in cfg_upper or "REJECTED" in cfg_upper:
             return "UNKNOWN", [], "Invalid input image configuration. Geographic overlap or image formats do not meet system requirements."
 
         # Bi-temporal query requested on single image -> REJECT
-        if config == "SINGLE_IMAGE" and any(w in q_lower for w in ["changed", "difference", "between dates", "bi-temporal", "before and after"]):
+        is_single = "SINGLE_IMAGE" in cfg_upper or "SINGLE IMAGE" in cfg_upper
+        is_bitemporal = "BI_TEMPORAL" in cfg_upper or "BI-TEMPORAL" in cfg_upper
+        is_crossmodal = "CROSS_MODAL" in cfg_upper or "CROSS-MODAL" in cfg_upper
+
+        if is_single and any(w in q_lower for w in ["changed", "difference", "between dates", "bi-temporal", "before and after"]):
             return "BI_TEMPORAL_CHANGE", [], "Bi-temporal change query requested, but only 1 image was uploaded. Please upload a second image from a different date."
 
         # Configuration: SINGLE_IMAGE
-        if config == "SINGLE_IMAGE":
+        if is_single:
             if any(w in q_lower for w in ["where", "locate", "find", "bounding box", "highlight"]):
                 return "GROUNDING", ["rs_grounding", "rsvqa"], None
             elif any(w in q_lower for w in ["describe", "caption", "summary", "overview"]):
@@ -117,14 +122,14 @@ class LLMOrchestrator:
                 return "SINGLE_IMAGE_VQA", ["rsvqa", "rs_vlm_captioner"], None
 
         # Configuration: BI_TEMPORAL_PAIR
-        elif config == "BI_TEMPORAL_PAIR":
+        elif is_bitemporal:
             if any(w in q_lower for w in ["what changed", "difference", "increase", "loss", "expansion"]):
                 return "BI_TEMPORAL_CHANGE_VQA", ["change_detection", "cdvqa"], None
             else:
                 return "BI_TEMPORAL_ANALYSIS", ["change_detection", "cdvqa", "rs_vlm_captioner"], None
 
         # Configuration: CROSS_MODAL_PAIR
-        elif config == "CROSS_MODAL_PAIR":
+        elif is_crossmodal:
             return "OPTICAL_SAR_FUSION", ["optical_sar_fusion", "rs_vlm_captioner"], None
 
         return "GENERAL_QUERY", ["rsvqa"], None

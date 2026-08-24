@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import Map, { Source, Layer, FillLayer, LineLayer } from 'react-map-gl'
+import Map, { Source, Layer, LayerProps } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { ExecutionTrace, TraceItem } from './components/ExecutionTrace'
 import { EvidenceCard, EvidenceArtifact } from './components/EvidenceCard'
@@ -65,27 +65,29 @@ export default function App() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return
-    const file = e.target.files[0]
+    const files = Array.from(e.target.files)
     setLoading(true)
     
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    try {
-      const res = await fetch(`${API_BASE}/upload`, {
-        method: 'POST',
-        body: formData
-      })
-      if (!res.ok) throw new Error(await res.text())
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('file', file)
       
-      const data = await res.json()
-      setImages(prev => [...prev, { id: data.id, filename: data.filename, ...data.metadata }])
-    } catch (err: any) {
-      alert(`Upload failed: ${err.message}`)
-    } finally {
-      setLoading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      try {
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData
+        })
+        if (!res.ok) throw new Error(await res.text())
+        
+        const data = await res.json()
+        setImages(prev => [...prev, { id: data.id, filename: data.filename, ...data.metadata }])
+      } catch (err: any) {
+        alert(`Upload failed for ${file.name}: ${err.message}`)
+      }
     }
+    
+    setLoading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleValidate = async () => {
@@ -198,7 +200,7 @@ export default function App() {
     })
   }
 
-  const polygonFillLayer: FillLayer = {
+  const polygonFillLayer: LayerProps = {
     id: 'footprints-fill',
     type: 'fill',
     paint: {
@@ -207,7 +209,7 @@ export default function App() {
     }
   }
 
-  const polygonLineLayer: LineLayer = {
+  const polygonLineLayer: LayerProps = {
     id: 'footprints-line',
     type: 'line',
     paint: {
@@ -216,7 +218,7 @@ export default function App() {
     }
   }
 
-  const evidenceLineLayer: LineLayer = {
+  const evidenceLineLayer: LayerProps = {
     id: 'evidence-bbox-line',
     type: 'line',
     paint: {
@@ -260,7 +262,7 @@ export default function App() {
         <div className="panel-left">
           <div className="panel-section">
             <h2>📥 Imagery Ingestion</h2>
-            <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".tif,.tiff,.png,.jpg,.jpeg" />
+            <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".tif,.tiff,.png,.jpg,.jpeg" multiple />
             <div className="file-drop" onClick={() => fileInputRef.current?.click()}>
               <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>📁</div>
               <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Upload GeoTIFF / Raster</div>
