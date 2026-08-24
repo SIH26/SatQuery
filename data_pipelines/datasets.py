@@ -15,7 +15,7 @@ class BigEarthNetDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         # Return standardized sample: optical tensor, multi-label tensor
         pass
 
@@ -31,7 +31,7 @@ class RSVQADataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         pass
 
 class CDVQADataset(Dataset):
@@ -46,7 +46,7 @@ class CDVQADataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         pass
 
 class VRSBenchDataset(Dataset):
@@ -61,5 +61,5 @@ class VRSBenchDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         pass
