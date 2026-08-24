@@ -49,6 +49,8 @@ lerna-debug.log*
 # Database & Storage
 *.sqlite
 *.db
+storage/
+test_data/
 backend/storage/uploads/
 data_pipelines/data/
 
