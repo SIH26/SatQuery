@@ -88,7 +88,9 @@ def create_analysis(request: AnalysisRequest, db: Session = Depends(get_db)):
         validation_data.append({
             "geom_wkt": img.geom,
             "modality": img.modality,
-            "acquisition_date": img.acquisition_date
+            "acquisition_date": img.acquisition_date,
+            "num_bands": img.num_bands,
+            "spatial_res": img.spatial_res
         })
         
     result = validation.detect_configuration(validation_data)

@@ -32,7 +32,23 @@ def detect_configuration(images: list) -> dict:
         img = images[0]
         if img.get("modality") == "UNKNOWN":
             return {"config": "SINGLE_IMAGE", "status": "PENDING_USER_CONFIRMATION", "errors": ["Modality is unknown. Please confirm."]}
-        return {"config": "SINGLE_IMAGE", "status": "READY_FOR_VQA", "errors": []}
+            
+        mod = img.get("modality", "UNKNOWN")
+        mod_display = "Optical/Multispectral" if mod == "OPTICAL" else mod
+        bands = img.get("num_bands", "?")
+        
+        date = img.get("acquisition_date")
+        if isinstance(date, str):
+            date_str = date[:10]
+        else:
+            date_str = date.strftime("%Y-%m-%d") if date else "UNKNOWN"
+            
+        res = img.get("spatial_res")
+        res_str = f"~{int(round(res))} m" if res is not None else "UNKNOWN"
+        
+        config_str = f"Configuration: Single Image | Modality: {mod_display} | Bands: {bands} | Date: {date_str} | Resolution: {res_str}"
+        
+        return {"config": config_str, "status": "READY_FOR_VQA", "errors": []}
         
     # Paired inputs
     img1, img2 = images[0], images[1]

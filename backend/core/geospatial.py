@@ -18,6 +18,9 @@ def extract_metadata(file_path: str, original_filename: str):
         res = dataset.res
         spatial_res = (res[0] + res[1]) / 2.0 if res else None
         
+        if spatial_res is not None and crs == "EPSG:4326":
+            spatial_res = spatial_res * 111320.0
+        
         # Transform bounds to EPSG:4326 (WGS84) for PostGIS / MapLibre compatibility
         if dataset.crs and dataset.crs != "EPSG:4326":
             minx, miny, maxx, maxy = transform_bounds(dataset.crs, 'EPSG:4326', *bounds)
@@ -65,8 +68,8 @@ def extract_metadata(file_path: str, original_filename: str):
                 
         # Fallback for Date in filename if missing (Simple heuristic)
         if not acquisition_date and original_filename:
-            # Look for YYYYMMDD string
-            match = re.search(r'(20\d{6})', original_filename)
+            # Look for YYYYMMDD or YYYY-MM-DD or YYYY_MM_DD
+            match = re.search(r'(20\d{2}[-_]?\d{2}[-_]?\d{2})', original_filename)
             if match:
                 try:
                     acquisition_date = parser.parse(match.group(1))
