@@ -80,6 +80,13 @@ def detect_configuration(images: list) -> dict:
         if date1 == date2:
             return {"config": "INVALID", "status": "REJECTED", "errors": ["Bi-temporal analysis requires images from different acquisition dates."]}
             
-        return {"config": "BI_TEMPORAL_PAIR", "status": "READY_FOR_CHANGE_ANALYSIS", "errors": []}
+        d1_str = date1[:10] if isinstance(date1, str) else (date1.strftime("%Y-%m-%d") if date1 else "UNKNOWN")
+        d2_str = date2[:10] if isinstance(date2, str) else (date2.strftime("%Y-%m-%d") if date2 else "UNKNOWN")
+        mod_display = "Optical/Multispectral" if mod1 == "OPTICAL" else mod1
+        overlap_pct = int(overlap * 100)
+        
+        config_str = f"Configuration: Bi-Temporal Pair | Modality: {mod_display} | Dates: {d1_str} vs {d2_str} | Overlap: {overlap_pct}%"
+            
+        return {"config": config_str, "status": "READY_FOR_CHANGE_ANALYSIS", "errors": []}
         
     return {"config": "INVALID", "status": "REJECTED", "errors": ["Unknown configuration."]}

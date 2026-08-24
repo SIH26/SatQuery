@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import Map, { Source, Layer, FillLayer } from 'react-map-gl'
+import Map, { Source, Layer, FillLayer } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const API_BASE = 'http://localhost:8000/api'
@@ -31,32 +31,35 @@ export default function App() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return
-    const file = e.target.files[0]
+    const files = Array.from(e.target.files)
     
-    addTrace(`Starting upload for ${file.name}...`)
     setLoading(true)
     
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    try {
-      const res = await fetch(`${API_BASE}/upload`, {
-        method: 'POST',
-        body: formData
-      })
-      if (!res.ok) throw new Error(await res.text())
+    for (const file of files) {
+      addTrace(`Starting upload for ${file.name}...`)
       
-      const data = await res.json()
-      addTrace(`Upload successful: ${file.name}`)
-      addTrace(`Metadata extracted: CRS=${data.metadata.crs}, Modality=${data.metadata.modality}`)
+      const formData = new FormData()
+      formData.append('file', file)
       
-      setImages(prev => [...prev, { id: data.id, filename: data.filename, ...data.metadata }])
-    } catch (err: any) {
-      addTrace(`Upload failed: ${err.message}`)
-    } finally {
-      setLoading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      try {
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData
+        })
+        if (!res.ok) throw new Error(await res.text())
+        
+        const data = await res.json()
+        addTrace(`Upload successful: ${file.name}`)
+        addTrace(`Metadata extracted: CRS=${data.metadata.crs}, Modality=${data.metadata.modality}`)
+        
+        setImages(prev => [...prev, { id: data.id, filename: data.filename, ...data.metadata }])
+      } catch (err: any) {
+        addTrace(`Upload failed: ${err.message}`)
+      }
     }
+    
+    setLoading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleValidate = async () => {
@@ -134,7 +137,7 @@ export default function App() {
         <div className="panel-left">
           <div className="panel-section">
             <h2>Ingestion</h2>
-            <input type="file" ref={fileInputRef} style={{display:'none'}} onChange={handleFileUpload} accept=".tif,.tiff,.png,.jpg,.jpeg" />
+            <input type="file" ref={fileInputRef} style={{display:'none'}} onChange={handleFileUpload} accept=".tif,.tiff,.png,.jpg,.jpeg" multiple />
             <div className="file-drop" onClick={() => fileInputRef.current?.click()}>
               {loading ? 'Processing...' : 'Click to Upload Imagery'}
             </div>

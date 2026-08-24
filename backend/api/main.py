@@ -83,10 +83,19 @@ def create_analysis(request: AnalysisRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="One or more images not found.")
         
     # Prepare data for validation
+    from shapely import wkb
     validation_data = []
     for img in images:
+        geom_wkt = None
+        if img.geom is not None:
+            try:
+                g = wkb.loads(bytes(img.geom.data))
+                geom_wkt = g.wkt
+            except:
+                pass
+                
         validation_data.append({
-            "geom_wkt": img.geom,
+            "geom_wkt": geom_wkt or img.geom,
             "modality": img.modality,
             "acquisition_date": img.acquisition_date,
             "num_bands": img.num_bands,
