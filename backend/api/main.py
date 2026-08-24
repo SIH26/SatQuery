@@ -5,15 +5,16 @@ from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel
 
-from backend.db.database import engine, Base, get_db
+from backend.db.database import engine, Base, get_db, run_migrations
 from backend.db import models
 from backend.core import storage, geospatial, validation
 from backend.services.orchestrator import orchestrator
 from backend.services.evidence_aggregator import evidence_aggregator
 from shapely import wkb
 
-# Create DB tables
+# Create DB tables & ensure schema migration
 Base.metadata.create_all(bind=engine)
+run_migrations()
 
 app = FastAPI(title="SatQuery AI Backend API", version="2.0.0")
 
