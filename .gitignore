@@ -51,6 +51,7 @@ lerna-debug.log*
 *.db
 storage/
 test_data/
+Browser_images*/
 backend/storage/uploads/
 data_pipelines/data/
 

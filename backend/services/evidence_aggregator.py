@@ -58,12 +58,9 @@ class EvidenceAggregator:
         overall_confidence = sum(confidences) / len(confidences) if confidences else 0.90
         overall_confidence = round(overall_confidence, 2)
 
-        # Grounded Synthesis logic (Strictly based on evidence)
-        primary_answer = answers[0] if answers else "Analysis complete based on uploaded imagery."
-        if len(answers) > 1:
-            synthesized_answer = f"{answers[0]} {answers[1]}"
-        else:
-            synthesized_answer = primary_answer
+        # Grounded Synthesis logic (Strictly based on evidence with deduplication)
+        unique_answers = list(dict.fromkeys([a.strip() for a in answers if a.strip()]))
+        synthesized_answer = " ".join(unique_answers) if unique_answers else "Analysis complete based on uploaded imagery."
 
         # Final audit step
         execution_trace.append({

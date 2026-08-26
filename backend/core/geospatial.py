@@ -20,13 +20,10 @@ def extract_metadata(file_path: str, original_filename: str):
         raw_res = (abs(res[0]) + abs(res[1])) / 2.0 if res else None
         
         # Convert degrees to meters if CRS is geographic (e.g., EPSG:4326)
-        if crs and ("4326" in crs or "OGC:CRS84" in crs or dataset.crs and dataset.crs.is_geographic):
-            spatial_res = raw_res * 111320.0 if raw_res else None
+        if raw_res and (crs and ("4326" in crs or "OGC:CRS84" in crs or (dataset.crs and dataset.crs.is_geographic))):
+            spatial_res = raw_res * 111320.0
         else:
             spatial_res = raw_res
-        
-        if spatial_res is not None and crs == "EPSG:4326":
-            spatial_res = spatial_res * 111320.0
         
         # Transform bounds to EPSG:4326 (WGS84) for PostGIS / MapLibre compatibility
         if dataset.crs and dataset.crs != "EPSG:4326":
@@ -68,20 +65,28 @@ def extract_metadata(file_path: str, original_filename: str):
         # Fallback to filename parsing
         if modality == "UNKNOWN" and original_filename:
             fn = original_filename.upper()
-            if fn.startswith("S1") or "SAR" in fn or "RADAR" in fn or "GRD" in fn:
+            if any(k in fn for k in ["S1", "SENTINEL1", "SENTINEL-1", "SAR", "RADAR", "GRD"]):
                 modality = "SAR"
                 modality_conf = "FILENAME"
-            elif fn.startswith("S2") or "OPTICAL" in fn or "L8" in fn or "LC08" in fn or "RGB" in fn or "MSI" in fn:
+            elif any(k in fn for k in ["S2", "SENTINEL2", "SENTINEL-2", "OPTICAL", "MULTISPECTRAL", "LANDSAT", "L8", "LC08", "RGB", "MSI", "BAND", "COLOR"]):
                 modality = "OPTICAL"
                 modality_conf = "FILENAME"
-                
-        # Fallback for Date in filename if missing (Sentinel / Landsat standard filename conventions)
+
+        # Structural fallback: multi-spectral count >= 3 is Optical
+        if modality == "UNKNOWN":
+            if num_bands >= 3:
+                modality = "OPTICAL"
+                modality_conf = "BAND_COUNT"
+            elif num_bands == 1 or num_bands == 2:
+                modality = "SAR"
+                modality_conf = "BAND_COUNT"
+
+        # Fallback for Date in filename if missing
         if not acquisition_date and original_filename:
-            # Look for YYYYMMDD, YYYY-MM-DD, YYYY_MM_DD, or YYYYMMDDTHHMMSS string
-            match = re.search(r'(20\d{2}[-_]?[0-1]\d[-_]?[0-3]\d(?:T\d{6})?)', original_filename)
+            match = re.search(r'(20\d{2}[-_][0-1]\d[-_][0-3]\d)', original_filename)
             if match:
                 try:
-                    acquisition_date = parser.parse(match.group(1))
+                    acquisition_date = parser.parse(match.group(1).replace('_', '-'))
                 except Exception:
                     pass
 
