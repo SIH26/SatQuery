@@ -10,13 +10,16 @@
     "preview": "node node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
+    "@types/three": "^0.185.4",
+    "axios": "^1.5.0",
+    "clsx": "^2.0.0",
+    "cobe": "^2.0.1",
+    "lucide-react": "^0.279.0",
+    "maplibre-gl": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "maplibre-gl": "^3.3.0",
     "react-map-gl": "^7.1.5",
-    "axios": "^1.5.0",
-    "lucide-react": "^0.279.0",
-    "clsx": "^2.0.0"
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

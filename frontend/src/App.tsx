@@ -3,6 +3,8 @@ import Map, { Source, Layer, LayerProps } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { ExecutionTrace, TraceItem } from './components/ExecutionTrace'
 import { EvidenceCard, EvidenceArtifact } from './components/EvidenceCard'
+import { ShowcasePage } from './components/ShowcasePage'
+import { HomePage } from './components/HomePage'
 
 const API_BASE = 'http://localhost:8000/api'
 
@@ -59,6 +61,7 @@ const DARK_MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/st
 const STREETS_MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<'home' | 'showcase' | 'dashboard'>('home')
   const [images, setImages] = useState<ImageMeta[]>([])
   const [loading, setLoading] = useState(false)
   const [executing, setExecuting] = useState(false)
@@ -349,16 +352,49 @@ export default function App() {
     }
   }
 
+  if (currentView === 'home') {
+    return <HomePage onLaunchDashboard={() => setCurrentView('dashboard')} />
+  }
+
+  if (currentView === 'showcase') {
+    return (
+      <div className="app-container">
+        <header className="header">
+          <div className="brand-title">
+            🛰️ SatQuery AI
+            <span className="brand-badge">Agentic Vision-Language Platform</span>
+          </div>
+
+          <div className="header-status">
+            <button className="button" style={{ width: 'auto', padding: '6px 16px', fontSize: '0.85rem' }} onClick={() => setCurrentView('dashboard')}>
+              🚀 Launch GIS Dashboard
+            </button>
+          </div>
+        </header>
+
+        <ShowcasePage onLaunchDashboard={() => setCurrentView('dashboard')} />
+      </div>
+    )
+  }
+
   return (
     <div className="app-container">
       {/* Top Navbar */}
       <header className="header">
-        <div className="brand-title">
+        <div className="brand-title" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer' }}>
           🛰️ SatQuery AI
           <span className="brand-badge">Agentic Vision-Language Platform</span>
         </div>
 
         <div className="header-status">
+          <button 
+            className="button-secondary" 
+            style={{ width: 'auto', fontSize: '0.8rem', padding: '6px 12px' }}
+            onClick={() => setCurrentView('home')}
+          >
+            ← Home
+          </button>
+
           <div className="status-indicator">
             <span className="dot-online"></span>
             PostGIS DB & Uvicorn API Online
