@@ -52,6 +52,7 @@ lerna-debug.log*
 storage/
 test_data/
 Browser_images*/
+AdobeStock*.mov
 backend/storage/uploads/
 data_pipelines/data/
 
